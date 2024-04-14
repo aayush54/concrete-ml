@@ -289,6 +289,7 @@ from .ops_impl import (
     numpy_sinh,
     numpy_slice,
     numpy_softplus,
+    numpy_split,
     numpy_squeeze,
     numpy_sub,
     numpy_tan,
@@ -384,6 +385,7 @@ ONNX_OPS_TO_NUMPY_IMPL: Dict[str, Callable[..., Tuple[numpy.ndarray, ...]]] = {
     "ConstantOfShape": numpy_constant_of_shape,
     "Expand": numpy_expand,
     "Unfold": numpy_unfold,
+    "Split": numpy_split,
 }
 
 

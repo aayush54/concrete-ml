@@ -123,6 +123,54 @@ def onnx_func_raw_args(*args, output_is_raw: bool = False):
 
     return decoration
 
+def numpy_split( 
+      input: numpy.ndarray,
+      num_outputs: int,
+      split: numpy.ndarray = None,
+      axis:int = 0
+) -> numpy.ndarray: 
+    """
+    Split a tensor into a list of tensors, along the specified 'axis'. 
+    Either input 'split' or the attribute 'num_outputs' should be specified, but not both. 
+    If the attribute 'num_outputs' is specified, then the tensor is split into equal sized parts. 
+    If the tensor is not evenly splittable into num_outputs, the last chunk will be smaller. 
+    If the input 'split' is specified, it indicates the sizes of each output in the split.
+    
+    Args:
+        input (numpy.ndarray): The tensor to split
+        num_outputs (int): Number of Outputs
+        split (numpy.ndarray, optional) : Optional length of each output, all values should be >=0. If not supplied, it is split in even length.
+        axis (int): Axis to modify. If not supplied, defaults to 0.
+
+    Returns:
+        outputs (numpy.ndarray) : one or more tensors after splitting
+
+    https://github.com/onnx/onnx/blob/main/onnx/reference/ops/op_split.py
+    """
+
+    # if no split if supplied, populate with defulat settings
+
+    if split is None:
+        # If can be perfectly divided:
+        if input.shape[axis] % num_outputs == 0:
+            split = [input.shape[axis] // num_outputs] * num_outputs
+        # Otherwise, do this weird operation (follows onnx)
+        else:
+            split = [(input.shape[axis] // num_outputs) + 1] * num_outputs
+            split[-1] += input.shape[axis] - sum(split)
+
+    sli = [slice(0,s) for s in inp.shape]
+
+    res = []
+    pos = 0
+
+    for s in split:
+        sli[axis] = slice(pos, pos+s)
+        pos += s
+        res.append(input[tuple(sli)])
+    
+    return tuple(res)
+
 
 def numpy_where_body(
     c: numpy.ndarray,
